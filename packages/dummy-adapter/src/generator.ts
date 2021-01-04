@@ -205,7 +205,10 @@ export const generateElements = (
       fieldTypeWeights.filter((_l, i) => fieldTypeOptions[i].length > 0)
     )
     if (
-      allowContainers
+      // We currently don't support containers of hidden string because
+      // we don't handle merging containers
+      (fieldType?.annotations?.[CORE_ANNOTATIONS.HIDDEN_VALUE] === true)
+      && allowContainers
       && Math.random() < defaultParams.listFieldFreq + defaultParams.mapFieldFreq
     ) {
       if (Math.random() < (
