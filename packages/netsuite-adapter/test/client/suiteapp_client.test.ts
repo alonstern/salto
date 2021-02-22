@@ -24,7 +24,7 @@ describe('SuiteAppClient', () => {
   const postMock = jest.spyOn(axios, 'post')
   const client = new SuiteAppClient({
     credentials: {
-      accountId: 'accountId',
+      accountId: 'ACCOUNT_ID',
       tokenId: 'tokenId',
       tokenSecret: 'tokenSecret',
     },
@@ -44,7 +44,7 @@ describe('SuiteAppClient', () => {
 
       expect(results).toEqual([{ a: 1 }, { a: 2 }])
       expect(postMock).toHaveBeenCalledWith(
-        'https://accountid.suitetalk.api.netsuite.com/services/rest/query/v1/suiteql?limit=1000&offset=0',
+        'https://account-id.suitetalk.api.netsuite.com/services/rest/query/v1/suiteql?limit=1000&offset=0',
         { q: 'query' },
         {
           headers: {
@@ -75,7 +75,7 @@ describe('SuiteAppClient', () => {
 
       expect(results).toEqual(items)
       expect(postMock).toHaveBeenCalledWith(
-        'https://accountid.suitetalk.api.netsuite.com/services/rest/query/v1/suiteql?limit=1000&offset=0',
+        'https://account-id.suitetalk.api.netsuite.com/services/rest/query/v1/suiteql?limit=1000&offset=0',
         { q: 'query' },
         {
           headers: {
@@ -87,7 +87,7 @@ describe('SuiteAppClient', () => {
       )
 
       expect(postMock).toHaveBeenCalledWith(
-        'https://accountid.suitetalk.api.netsuite.com/services/rest/query/v1/suiteql?limit=1000&offset=1000',
+        'https://account-id.suitetalk.api.netsuite.com/services/rest/query/v1/suiteql?limit=1000&offset=1000',
         { q: 'query' },
         {
           headers: {
@@ -128,7 +128,7 @@ describe('SuiteAppClient', () => {
 
       expect(results).toEqual([{ a: 1 }, { a: 2 }])
       expect(postMock).toHaveBeenCalledWith(
-        'https://accountid.restlets.api.netsuite.com/app/site/hosting/restlet.nl?script=customscript_salto_search_restlet&deploy=customdeploy_salto_search_restlet',
+        'https://account-id.restlets.api.netsuite.com/app/site/hosting/restlet.nl?script=customscript_salto_search_restlet&deploy=customdeploy_salto_search_restlet',
         {
           type: 'type',
           columns: [],
@@ -191,7 +191,7 @@ describe('SuiteAppClient', () => {
 
       expect(results).toEqual(items)
       expect(postMock).toHaveBeenCalledWith(
-        'https://accountid.restlets.api.netsuite.com/app/site/hosting/restlet.nl?script=customscript_salto_search_restlet&deploy=customdeploy_salto_search_restlet',
+        'https://account-id.restlets.api.netsuite.com/app/site/hosting/restlet.nl?script=customscript_salto_search_restlet&deploy=customdeploy_salto_search_restlet',
         {
           type: 'type',
           columns: [],
@@ -207,7 +207,7 @@ describe('SuiteAppClient', () => {
         }
       )
       expect(postMock).toHaveBeenCalledWith(
-        'https://accountid.restlets.api.netsuite.com/app/site/hosting/restlet.nl?script=customscript_salto_search_restlet&deploy=customdeploy_salto_search_restlet',
+        'https://account-id.restlets.api.netsuite.com/app/site/hosting/restlet.nl?script=customscript_salto_search_restlet&deploy=customdeploy_salto_search_restlet',
         {
           type: 'type',
           columns: [],
