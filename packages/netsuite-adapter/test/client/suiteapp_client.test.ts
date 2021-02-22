@@ -15,6 +15,7 @@
 */
 import axios from 'axios'
 import Bottleneck from 'bottleneck'
+import _ from 'lodash'
 import { SuiteAppClient } from '../../src/client/suiteapp_client/suiteapp_client'
 
 jest.mock('axios')
@@ -44,6 +45,49 @@ describe('SuiteAppClient', () => {
       expect(results).toEqual([{ a: 1 }, { a: 2 }])
       expect(postMock).toHaveBeenCalledWith(
         'https://accountid.suitetalk.api.netsuite.com/services/rest/query/v1/suiteql?limit=1000&offset=0',
+        { q: 'query' },
+        {
+          headers: {
+            Authorization: expect.any(String),
+            'Content-Type': 'application/json',
+            prefer: 'transient',
+          },
+        }
+      )
+    })
+
+    it('should return all pages', async () => {
+      const items = _.range(1500).map(i => ({ i }))
+
+      postMock.mockImplementation(async rawUrl => {
+        const url = new URL(rawUrl)
+        const limit = parseInt(url.searchParams.get('limit') ?? '', 10)
+        const offset = parseInt(url.searchParams.get('offset') ?? '', 10)
+        return {
+          data: {
+            hasMore: offset + limit < items.length,
+            items: items.slice(offset, offset + limit).map(item => ({ ...item, links: [] })),
+          },
+        }
+      })
+
+      const results = await client.runSuiteQL('query')
+
+      expect(results).toEqual(items)
+      expect(postMock).toHaveBeenCalledWith(
+        'https://accountid.suitetalk.api.netsuite.com/services/rest/query/v1/suiteql?limit=1000&offset=0',
+        { q: 'query' },
+        {
+          headers: {
+            Authorization: expect.any(String),
+            'Content-Type': 'application/json',
+            prefer: 'transient',
+          },
+        }
+      )
+
+      expect(postMock).toHaveBeenCalledWith(
+        'https://accountid.suitetalk.api.netsuite.com/services/rest/query/v1/suiteql?limit=1000&offset=1000',
         { q: 'query' },
         {
           headers: {
@@ -127,6 +171,57 @@ describe('SuiteAppClient', () => {
           filters: [],
         })).toBeUndefined()
       })
+    })
+
+    it('should return all pages', async () => {
+      const items = _.range(1500).map(i => ({ i }))
+
+      postMock.mockImplementation(async (_url, data) => ({
+        data: {
+          status: 'success',
+          results: items.slice(data.offset, data.offset + data.limit),
+        },
+      }))
+
+      const results = await client.runSavedSearchQuery({
+        type: 'type',
+        columns: [],
+        filters: [],
+      })
+
+      expect(results).toEqual(items)
+      expect(postMock).toHaveBeenCalledWith(
+        'https://accountid.restlets.api.netsuite.com/app/site/hosting/restlet.nl?script=customscript_salto_search_restlet&deploy=customdeploy_salto_search_restlet',
+        {
+          type: 'type',
+          columns: [],
+          filters: [],
+          offset: 0,
+          limit: 1000,
+        },
+        {
+          headers: {
+            Authorization: expect.any(String),
+            'Content-Type': 'application/json',
+          },
+        }
+      )
+      expect(postMock).toHaveBeenCalledWith(
+        'https://accountid.restlets.api.netsuite.com/app/site/hosting/restlet.nl?script=customscript_salto_search_restlet&deploy=customdeploy_salto_search_restlet',
+        {
+          type: 'type',
+          columns: [],
+          filters: [],
+          offset: 1000,
+          limit: 1000,
+        },
+        {
+          headers: {
+            Authorization: expect.any(String),
+            'Content-Type': 'application/json',
+          },
+        }
+      )
     })
   })
 })
