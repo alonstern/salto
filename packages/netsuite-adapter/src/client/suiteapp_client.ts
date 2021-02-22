@@ -13,7 +13,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-// import Bottleneck from 'bottleneck'
+import Bottleneck from 'bottleneck'
 import OAuth from 'oauth-1.0a'
 import crypto from 'crypto'
 import axios, { AxiosResponse } from 'axios'
@@ -31,7 +31,7 @@ const log = logger(module)
 
 export type SuiteAppClientParameters = {
   credentials: Credentials
-  // callsLimiter: Bottleneck
+  callsLimiter: Bottleneck
 }
 
 export type SavedSearchQuery = {
@@ -42,13 +42,13 @@ export type SavedSearchQuery = {
 
 export class SuiteAppClient {
   private credentials: Credentials
-  // private callsLimiter: Bottleneck
+  private callsLimiter: Bottleneck
   private suiteQLUrl: URL
   private savedSearchUrl: URL
 
   constructor(params: SuiteAppClientParameters) {
     this.credentials = params.credentials
-    // this.callsLimiter = params.callsLimiter
+    this.callsLimiter = params.callsLimiter
     this.suiteQLUrl = new URL(`https://${params.credentials.accountId}.suitetalk.api.netsuite.com/services/rest/query/v1/suiteql`)
     this.savedSearchUrl = new URL(`https://${params.credentials.accountId}.restlets.api.netsuite.com/app/site/hosting/restlet.nl?script=customscript_salto_search_restlet&deploy=customdeploy_salto_search_restlet`)
   }
@@ -101,32 +101,34 @@ export class SuiteAppClient {
     url.searchParams.append('offset', offset.toString())
 
     const headers = {
-      ...this.generateAuthHeader(url, 'POST'),
+      ...this.generateHeaders(url, 'POST'),
       prefer: 'transient',
-      'Content-Type': 'application/json',
     }
-    return axios.post(
+    return this.callsLimiter.schedule(() => axios.post(
       url.href,
       { q: query },
       { headers },
-    )
+    ))
   }
 
   private async sendSavedSearchRequest(query: SavedSearchQuery, offset: number, limit: number):
   Promise<AxiosResponse> {
-    const headers = {
-      ...this.generateAuthHeader(this.savedSearchUrl, 'POST'),
-      'Content-Type': 'application/json',
-    }
-    return axios.post(
+    return this.callsLimiter.schedule(() => axios.post(
       this.savedSearchUrl.href,
       {
         ...query,
         offset,
         limit,
       },
-      { headers },
-    )
+      { headers: this.generateHeaders(this.savedSearchUrl, 'POST') },
+    ))
+  }
+
+  private generateHeaders(url: URL, method: HttpMethod): Record<string, string> {
+    return {
+      ...this.generateAuthHeader(url, method),
+      'Content-Type': 'application/json',
+    }
   }
 
   private generateAuthHeader(url: URL, method: HttpMethod): OAuth.Header {
