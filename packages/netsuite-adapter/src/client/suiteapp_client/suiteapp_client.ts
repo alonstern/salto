@@ -41,7 +41,7 @@ export class SuiteAppClient {
   constructor(params: SuiteAppClientParameters) {
     this.credentials = params.credentials
     this.callsLimiter = params.callsLimiter
-    // TODO: change account id conversion
+    // TODO: change account id conversion (should '_' be replaced with '-' ?)
     this.suiteQLUrl = new URL(`https://${params.credentials.accountId}.suitetalk.api.netsuite.com/services/rest/query/v1/suiteql`)
     this.savedSearchUrl = new URL(`https://${params.credentials.accountId}.restlets.api.netsuite.com/app/site/hosting/restlet.nl?script=customscript_salto_search_restlet&deploy=customdeploy_salto_search_restlet`)
     this.ajv = new Ajv({ allErrors: true, strict: false })
@@ -55,6 +55,8 @@ export class SuiteAppClient {
       try {
         // eslint-disable-next-line no-await-in-loop
         const results = await this.sendSuiteQLRequest(query, offset, PAGE_SIZE)
+        // For some reason, a "link" field with empty array is returned regardless
+        // to the SELECT values in the query.
         items.push(...results.items.map(item => _.omit(item, ['links'])))
         hasMore = results.hasMore
       } catch (error) {

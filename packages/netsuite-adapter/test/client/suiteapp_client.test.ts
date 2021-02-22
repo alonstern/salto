@@ -13,5 +13,120 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-// describe('runSuiteQL', () => {
-// })
+import axios from 'axios'
+import Bottleneck from 'bottleneck'
+import { SuiteAppClient } from '../../src/client/suiteapp_client/suiteapp_client'
+
+jest.mock('axios')
+
+describe('SuiteAppClient', () => {
+  const postMock = jest.spyOn(axios, 'post')
+  const client = new SuiteAppClient({
+    credentials: {
+      accountId: 'accountId',
+      tokenId: 'tokenId',
+      tokenSecret: 'tokenSecret',
+    },
+    callsLimiter: new Bottleneck(),
+  })
+
+  describe('runSuiteQL', () => {
+    it('successful query should return the results', async () => {
+      postMock.mockResolvedValue({
+        data: {
+          hasMore: false,
+          items: [{ links: [], a: 1 }, { links: [], a: 2 }],
+        },
+      })
+
+      const results = await client.runSuiteQL('query')
+
+      expect(results).toEqual([{ a: 1 }, { a: 2 }])
+      expect(postMock).toHaveBeenCalledWith(
+        'https://accountid.suitetalk.api.netsuite.com/services/rest/query/v1/suiteql?limit=1000&offset=0',
+        { q: 'query' },
+        {
+          headers: {
+            Authorization: expect.any(String),
+            'Content-Type': 'application/json',
+            prefer: 'transient',
+          },
+        }
+      )
+    })
+
+    describe('query failure', () => {
+      it('exception thrown', async () => {
+        postMock.mockRejectedValue(new Error())
+        expect(await client.runSuiteQL('')).toBeUndefined()
+      })
+      it('invalid results', async () => {
+        postMock.mockResolvedValue({ data: {} })
+        expect(await client.runSuiteQL('')).toBeUndefined()
+      })
+    })
+  })
+
+  describe('runSavedSearchQuery', () => {
+    it('successful query should return the results', async () => {
+      postMock.mockResolvedValue({
+        data: {
+          status: 'success',
+          results: [{ a: 1 }, { a: 2 }],
+        },
+      })
+
+      const results = await client.runSavedSearchQuery({
+        type: 'type',
+        columns: [],
+        filters: [],
+      })
+
+      expect(results).toEqual([{ a: 1 }, { a: 2 }])
+      expect(postMock).toHaveBeenCalledWith(
+        'https://accountid.restlets.api.netsuite.com/app/site/hosting/restlet.nl?script=customscript_salto_search_restlet&deploy=customdeploy_salto_search_restlet',
+        {
+          type: 'type',
+          columns: [],
+          filters: [],
+          offset: 0,
+          limit: 1000,
+        },
+        {
+          headers: {
+            Authorization: expect.any(String),
+            'Content-Type': 'application/json',
+          },
+        }
+      )
+    })
+
+    describe('query failure', () => {
+      it('exception thrown', async () => {
+        postMock.mockRejectedValue(new Error())
+        expect(await client.runSavedSearchQuery({
+          type: 'type',
+          columns: [],
+          filters: [],
+        })).toBeUndefined()
+      })
+      it('invalid results', async () => {
+        postMock.mockResolvedValue({ data: {} })
+        expect(await client.runSavedSearchQuery({
+          type: 'type',
+          columns: [],
+          filters: [],
+        })).toBeUndefined()
+      })
+
+      it('error status', async () => {
+        postMock.mockResolvedValue({ data: { status: 'error', message: '' } })
+        expect(await client.runSavedSearchQuery({
+          type: 'type',
+          columns: [],
+          filters: [],
+        })).toBeUndefined()
+      })
+    })
+  })
+})
