@@ -15,8 +15,8 @@
 */
 import path from 'path'
 import { logger } from '@salto-io/logging'
-import { formatSuiteQLDate } from './formats'
-import { FileCabinetChangesDetector } from './types'
+import { formatSuiteQLDate } from '../formats'
+import { FileCabinetChangesDetector } from '../types'
 
 const log = logger(module)
 

@@ -16,11 +16,14 @@
 import { logger } from '@salto-io/logging'
 import { SuiteAppClient } from '../client/suiteapp_client/suiteapp_client'
 import { NetsuiteQuery } from '../query'
-import { getChangedFiles, getChangedFolders } from './file_cabinet_changes'
+import { getChangedFiles, getChangedFolders } from './changes_detectors/file_cabinet'
+import customRecordTypeDetector from './changes_detectors/custom_record_type'
+import customFieldDetector from './changes_detectors/custom_field'
 import { formatSavedSearchDate } from './formats'
 import { DateRange } from './types'
 
 const log = logger(module)
+
 
 const getChangedInternalIds = async (client: SuiteAppClient, dateRange: DateRange):
 Promise<Set<number>> => {
@@ -52,19 +55,44 @@ Promise<Set<number>> => {
 
 export const getChangedObjects = async (
   client: SuiteAppClient,
-  _query: NetsuiteQuery,
+  query: NetsuiteQuery,
   dateRange: DateRange
 ): Promise<NetsuiteQuery> => {
-  const changedInternalIds = await getChangedInternalIds(client, dateRange)
-
   log.debug('Starting to look for changed objects')
-  const paths = new Set(
+
+  const instancesChangesPromise = Promise.all(
     [
-      ...await getChangedFiles(client, dateRange),
-      ...await getChangedFolders(client, dateRange),
-    ]
-      .filter(({ internalId }) => changedInternalIds.has(internalId))
-      .map(({ externalId }) => externalId)
+      customRecordTypeDetector,
+      customFieldDetector,
+    ].filter(detector => detector.getTypes().some(query.isTypeMatch))
+      .map(detector => detector.getChanges(client, dateRange))
+  ).then(output => output.flat())
+
+  const fileChangesPromise = Promise.all([
+    getChangedFiles(client, dateRange),
+    getChangedFolders(client, dateRange),
+  ]).then(output => output.flat())
+
+  const [
+    changedInternalIds,
+    changedInstances,
+    changedFiles,
+  ] = await Promise.all([
+    getChangedInternalIds(client, dateRange),
+    instancesChangesPromise,
+    fileChangesPromise,
+  ])
+
+  const paths = new Set(
+    changedFiles.filter(
+      ({ internalId }) => changedInternalIds.has(internalId)
+    ).map(({ externalId }) => externalId)
+  )
+
+  const scriptIds = new Set(
+    changedInstances.filter(
+      ({ internalId }) => internalId === undefined || changedInternalIds.has(internalId)
+    ).map(({ externalId }) => externalId)
   )
   // eslint-disable-next-line no-console
   console.log(paths)
@@ -72,9 +100,12 @@ export const getChangedObjects = async (
   // eslint-disable-next-line no-console
   console.log(changedInternalIds)
 
+  // eslint-disable-next-line no-console
+  console.log(scriptIds)
+
   return {
     isTypeMatch: () => true,
-    isObjectMatch: () => true,
+    isObjectMatch: objectID => scriptIds.has(objectID.scriptId),
     isFileMatch: filePath => paths.has(filePath),
   }
 }

@@ -16,8 +16,8 @@
 import { SuiteAppClient } from '../client/suiteapp_client/suiteapp_client'
 
 export type ChangedObject = {
-  internalId: number
   externalId: string
+  internalId?: number
 }
 
 export type DateRange = {
@@ -26,10 +26,10 @@ export type DateRange = {
 }
 
 export type TypeChangesDetector = {
-  getScriptIds: (client: SuiteAppClient, dateRange: DateRange) =>
-    Promise<ChangedObject[] | undefined>
+  getChanges: (client: SuiteAppClient, dateRange: DateRange) =>
+    Promise<ChangedObject[]>
   getTypes: () => string[]
 }
 
 export type FileCabinetChangesDetector = (client: SuiteAppClient, dateRange: DateRange) =>
-  Promise<ChangedObject[]>
+  Promise<Required<ChangedObject>[]>
