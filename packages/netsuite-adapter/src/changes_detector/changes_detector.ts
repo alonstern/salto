@@ -19,6 +19,7 @@ import { NetsuiteQuery } from '../query'
 import { getChangedFiles, getChangedFolders } from './changes_detectors/file_cabinet'
 import customRecordTypeDetector from './changes_detectors/custom_record_type'
 import customFieldDetector from './changes_detectors/custom_field'
+import roleDetector from './changes_detectors/role'
 import { formatSavedSearchDate } from './formats'
 import { DateRange } from './types'
 
@@ -64,6 +65,7 @@ export const getChangedObjects = async (
     [
       customRecordTypeDetector,
       customFieldDetector,
+      roleDetector,
     ].filter(detector => detector.getTypes().some(query.isTypeMatch))
       .map(detector => detector.getChanges(client, dateRange))
   ).then(output => output.flat())
