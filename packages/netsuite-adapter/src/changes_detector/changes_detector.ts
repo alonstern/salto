@@ -22,6 +22,7 @@ import customRecordTypeDetector from './changes_detectors/custom_record_type'
 import customFieldDetector from './changes_detectors/custom_field'
 import scriptDetector from './changes_detectors/script'
 import roleDetector from './changes_detectors/role'
+import workflowDetector from './changes_detectors/workflow'
 import { formatSavedSearchDate } from './formats'
 import { ChangedType, DateRange } from './types'
 
@@ -69,6 +70,7 @@ export const getChangedObjects = async (
       customFieldDetector,
       roleDetector,
       scriptDetector,
+      workflowDetector,
     ].filter(detector => detector.getTypes().some(query.isTypeMatch))
       .map(detector => detector.getChanges(client, dateRange))
   ).then(output => output.flat())
