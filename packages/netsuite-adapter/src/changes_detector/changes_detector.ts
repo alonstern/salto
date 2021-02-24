@@ -14,14 +14,16 @@
 * limitations under the License.
 */
 import { logger } from '@salto-io/logging'
+import _ from 'lodash'
 import { SuiteAppClient } from '../client/suiteapp_client/suiteapp_client'
 import { NetsuiteQuery } from '../query'
 import { getChangedFiles, getChangedFolders } from './changes_detectors/file_cabinet'
 import customRecordTypeDetector from './changes_detectors/custom_record_type'
 import customFieldDetector from './changes_detectors/custom_field'
+import scriptDetector from './changes_detectors/script'
 import roleDetector from './changes_detectors/role'
 import { formatSavedSearchDate } from './formats'
-import { DateRange } from './types'
+import { ChangedType, DateRange } from './types'
 
 const log = logger(module)
 
@@ -66,6 +68,7 @@ export const getChangedObjects = async (
       customRecordTypeDetector,
       customFieldDetector,
       roleDetector,
+      scriptDetector,
     ].filter(detector => detector.getTypes().some(query.isTypeMatch))
       .map(detector => detector.getChanges(client, dateRange))
   ).then(output => output.flat())
@@ -91,11 +94,16 @@ export const getChangedObjects = async (
     ).map(({ externalId }) => externalId)
   )
 
+
+  const [changedTypes, changedObjects] = _.partition(changedInstances, (change): change is ChangedType => change.type === 'type')
+
   const scriptIds = new Set(
-    changedInstances.filter(
+    changedObjects.filter(
       ({ internalId }) => internalId === undefined || changedInternalIds.has(internalId)
     ).map(({ externalId }) => externalId)
   )
+
+  const types = new Set(changedTypes.map(type => type.name))
   // eslint-disable-next-line no-console
   console.log(paths)
 
@@ -105,9 +113,12 @@ export const getChangedObjects = async (
   // eslint-disable-next-line no-console
   console.log(scriptIds)
 
+  // eslint-disable-next-line no-console
+  console.log(types)
+
   return {
     isTypeMatch: () => true,
-    isObjectMatch: objectID => scriptIds.has(objectID.scriptId),
+    isObjectMatch: objectID => scriptIds.has(objectID.scriptId) || types.has(objectID.type),
     isFileMatch: filePath => paths.has(filePath),
   }
 }

@@ -43,6 +43,7 @@ export const getChangedFiles: FileCabinetChangesDetector = async (client, dateRa
       return true
     })
     .map(res => ({
+      type: 'object',
       externalId: path.join('/', ...res.appfolder.split(' : '), res.name),
       internalId: parseInt(res.id, 10),
     }))
@@ -69,6 +70,7 @@ export const getChangedFolders: FileCabinetChangesDetector = async (client, date
       return true
     })
     .map(res => ({
+      type: 'object',
       externalId: path.join('/', ...res.appfolder.split(' : ')),
       internalId: parseInt(res.id, 10),
     }))

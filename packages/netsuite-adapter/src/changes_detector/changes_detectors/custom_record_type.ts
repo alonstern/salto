@@ -41,6 +41,7 @@ const changesDetector: TypeChangesDetector = {
         return true
       })
       .map(res => ({
+        type: 'object',
         externalId: res.scriptid,
       }))
   },

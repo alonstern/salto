@@ -16,9 +16,17 @@
 import { SuiteAppClient } from '../client/suiteapp_client/suiteapp_client'
 
 export type ChangedObject = {
+  type: 'object'
   externalId: string
   internalId?: number
 }
+
+export type ChangedType = {
+  type: 'type'
+  name: string
+}
+
+export type Change = ChangedType | ChangedObject
 
 export type DateRange = {
   start: Date
@@ -27,7 +35,7 @@ export type DateRange = {
 
 export type TypeChangesDetector = {
   getChanges: (client: SuiteAppClient, dateRange: DateRange) =>
-    Promise<ChangedObject[]>
+    Promise<Change[]>
   getTypes: () => string[]
 }
 

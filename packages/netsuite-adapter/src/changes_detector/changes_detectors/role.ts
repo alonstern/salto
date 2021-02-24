@@ -31,6 +31,7 @@ const parseGeneralRolesChanges = (changes?: Record<string, unknown>[]): ChangedO
     }
     return true
   }).map(res => ({
+    type: 'object',
     externalId: res.scriptid,
     internalId: parseInt(res.id, 10),
   }))
@@ -72,7 +73,7 @@ const parsePermissionRolesChanges = (
 
   return changesInternalIds
     .filter(id => id in internalToExternalId)
-    .map(id => ({ externalId: internalToExternalId[id] }))
+    .map(id => ({ type: 'object', externalId: internalToExternalId[id] }))
 }
 
 const changesDetector: TypeChangesDetector = {
