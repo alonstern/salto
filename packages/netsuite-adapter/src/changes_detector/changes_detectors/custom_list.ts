@@ -24,7 +24,7 @@ const changesDetector: TypeChangesDetector = {
     const results = await client.runSuiteQL(`
       SELECT scriptid
       FROM customlist
-      WHERE lastmodifieddate  BETWEEN '${formatSuiteQLDate(dateRange.start)}' AND '${formatSuiteQLDate(dateRange.end)}'
+      WHERE lastmodifieddate BETWEEN '${formatSuiteQLDate(dateRange.start)}' AND '${formatSuiteQLDate(dateRange.end)}'
     `)
 
     if (results === undefined) {

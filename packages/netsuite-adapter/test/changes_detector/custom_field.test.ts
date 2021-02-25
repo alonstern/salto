@@ -14,10 +14,10 @@
 * limitations under the License.
 */
 import { SuiteAppClient } from '../../src/client/suiteapp_client/suiteapp_client'
-import detector from '../../src/changes_detector/changes_detectors/custom_record_type'
+import detector from '../../src/changes_detector/changes_detectors/custom_field'
 import { Change } from '../../src/changes_detector/types'
 
-describe('custom_record_type', () => {
+describe('custom_field', () => {
   const runSuiteQLMock = jest.fn()
   const client = {
     runSuiteQL: runSuiteQLMock,
@@ -44,7 +44,7 @@ describe('custom_record_type', () => {
     it('should make the right query', () => {
       expect(runSuiteQLMock).toHaveBeenCalledWith(`
       SELECT scriptid
-      FROM customrecordtype
+      FROM customfield
       WHERE lastmodifieddate BETWEEN '1/11/2021' AND '2/22/2021'
     `)
     })
