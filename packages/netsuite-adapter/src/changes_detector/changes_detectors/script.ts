@@ -19,7 +19,7 @@ import { ChangedObject, TypeChangesDetector } from '../types'
 
 const log = logger(module)
 
-const SCRIPT_TYPES = [
+export const SCRIPT_TYPES = [
   'bundleinstallationscript',
   'clientscript',
   'scheduledscript',
