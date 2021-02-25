@@ -17,6 +17,6 @@ export const formatSuiteQLDate = (date: Date): string => `${date.getUTCMonth() +
 
 export const formatSavedSearchDate = (date: Date): string => {
   const hour = date.getUTCHours() > 12 ? date.getUTCHours() - 12 : date.getUTCHours()
-  const dayTime = date.getUTCHours() > 12 ? 'pm' : 'am'
+  const dayTime = date.getUTCHours() >= 12 ? 'pm' : 'am'
   return `${date.getUTCMonth() + 1}/${date.getUTCDate()}/${date.getUTCFullYear()} ${hour}:${date.getUTCMinutes()} ${dayTime}`
 }
