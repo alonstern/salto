@@ -32,7 +32,7 @@ describe('workflow', () => {
         runSavedSearchQueryMock.mockResolvedValue([{ recordid: 'a' }])
         results = await detector.getChanges(
           client,
-          { start: new Date('2021-01-11T18:55:17.949Z'), end: new Date('2021-02-22T18:55:17.949Z') }
+          { start: new Date('2021-01-11T18:55:17.949Z'), end: new Date('2021-02-22T06:55:17.949Z') }
         )
       })
       it('should return the type', () => {
@@ -47,7 +47,7 @@ describe('workflow', () => {
           filters: [
             ['recordtype', 'is', '-129'],
             'and',
-            ['date', 'within', '1/11/2021 6:55 pm', '2/22/2021 6:55 pm'],
+            ['date', 'within', '1/11/2021 6:55 pm', '2/22/2021 6:55 am'],
           ],
           columns: ['recordid'],
         })

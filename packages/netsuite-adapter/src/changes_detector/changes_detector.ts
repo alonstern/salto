@@ -32,7 +32,7 @@ const log = logger(module)
 
 
 const getChangedInternalIds = async (client: SuiteAppClient, dateRange: DateRange):
-Promise<Set<number>> => {
+Promise<Set<number> | undefined> => {
   const results = await client.runSavedSearchQuery({
     type: 'systemnote',
     filters: [
@@ -43,7 +43,7 @@ Promise<Set<number>> => {
 
   if (results === undefined) {
     log.warn('file changes query failed')
-    return new Set()
+    return undefined
   }
 
   return new Set(
@@ -96,7 +96,7 @@ export const getChangedObjects = async (
 
   const paths = new Set(
     changedFiles.filter(
-      ({ internalId }) => changedInternalIds.has(internalId)
+      ({ internalId }) => changedInternalIds === undefined || changedInternalIds.has(internalId)
     ).map(({ externalId }) => externalId)
   )
 
@@ -105,8 +105,10 @@ export const getChangedObjects = async (
 
   const scriptIds = new Set(
     changedObjects.filter(
-      ({ internalId }) => internalId === undefined || changedInternalIds.has(internalId)
-    ).map(({ externalId }) => externalId)
+      ({ internalId }) => internalId === undefined
+        || changedInternalIds === undefined
+        || changedInternalIds.has(internalId)
+    ).map(({ externalId }) => externalId.toLowerCase())
   )
 
   const types = new Set(changedTypes.map(type => type.name))
