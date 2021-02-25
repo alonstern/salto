@@ -13,10 +13,10 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-export const formatSuiteQLDate = (date: Date): string => `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`
+export const formatSuiteQLDate = (date: Date): string => `${date.getUTCMonth() + 1}/${date.getUTCDate()}/${date.getUTCFullYear()}`
 
 export const formatSavedSearchDate = (date: Date): string => {
-  const hour = date.getHours() > 12 ? date.getHours() - 12 : date.getHours()
-  const dayTime = date.getHours() > 12 ? 'pm' : 'am'
-  return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()} ${hour}:${date.getMinutes()} ${dayTime}`
+  const hour = date.getUTCHours() > 12 ? date.getUTCHours() - 12 : date.getUTCHours()
+  const dayTime = date.getUTCHours() > 12 ? 'pm' : 'am'
+  return `${date.getUTCMonth() + 1}/${date.getUTCDate()}/${date.getUTCFullYear()} ${hour}:${date.getUTCMinutes()} ${dayTime}`
 }

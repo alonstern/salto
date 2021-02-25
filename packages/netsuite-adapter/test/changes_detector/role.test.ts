@@ -96,6 +96,12 @@ describe('role', () => {
       SELECT scriptid, id
       FROM role
     `)
+
+      expect(runSavedSearchQueryMock).toHaveBeenCalledWith({
+        type: 'role',
+        columns: ['internalid'],
+        filters: [['permchangedate', 'within', '1/11/2021 6:55 pm', '2/22/2021 6:55 pm']],
+      })
     })
   })
 

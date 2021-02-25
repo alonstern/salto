@@ -24,7 +24,7 @@ const changesDetector: TypeChangesDetector = {
     const results = await client.runSavedSearchQuery({
       type: 'savedsearch',
       columns: ['id'],
-      filters: ['datemodified', 'within', formatSavedSearchDate(dateRange.start), formatSavedSearchDate(dateRange.end)],
+      filters: [['datemodified', 'within', formatSavedSearchDate(dateRange.start), formatSavedSearchDate(dateRange.end)]],
     })
 
     if (results === undefined) {
