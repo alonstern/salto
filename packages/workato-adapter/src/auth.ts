@@ -20,11 +20,19 @@ export const usernameTokenCredentialsType = new ObjectType({
   elemID: new ElemID(constants.WORKATO),
   fields: {
     username: { type: BuiltinTypes.STRING },
-    token: { type: BuiltinTypes.STRING },
+    token: {
+      type: BuiltinTypes.STRING,
+    },
   },
 })
 
-export type UsernameTokenCredentials = {
+export class UsernameTokenCredentials {
+  constructor({ username, token }:
+    { username: string; token: string }) {
+    this.username = username
+    this.token = token
+  }
+
   username: string
   token: string
 }

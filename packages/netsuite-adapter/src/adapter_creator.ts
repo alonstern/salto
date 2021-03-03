@@ -21,6 +21,7 @@ import { collections, regex } from '@salto-io/lowerdash'
 import { logger } from '@salto-io/logging'
 import _ from 'lodash'
 import { SdkDownloadService } from '@salto-io/suitecloud-cli'
+// import Bottleneck from 'bottleneck'
 import changeValidator from './change_validator'
 import { getChangeGroupIds } from './group_changes'
 import NetsuiteClient from './client/client'
@@ -34,6 +35,7 @@ import {
 } from './constants'
 import { validateParameters } from './query'
 import { Credentials } from './client/credentials'
+// import { SuiteAppClient } from './client/suiteapp_client/suiteapp_client'
 
 const log = logger(module)
 const { makeArray } = collections.array
@@ -109,6 +111,7 @@ const netsuiteCredentialsFromCredentials = (credentials: Readonly<InstanceElemen
 const getAdapterOperations = (context: AdapterOperationsContext): AdapterOperations => {
   const adapterConfig = netsuiteConfigFromConfig(context.config)
   const credentials = netsuiteCredentialsFromCredentials(context.credentials)
+
   return new NetsuiteAdapter({
     client: new NetsuiteClient({ credentials, config: adapterConfig[CLIENT_CONFIG] }),
     elementsSource: context.elementsSource,

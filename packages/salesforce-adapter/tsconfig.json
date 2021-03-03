@@ -21,7 +21,6 @@
     "references": [
         { "path": "../persistent-pool" },
         { "path": "../adapter-api" },
-        { "path": "../adapter-components" },
         { "path": "../adapter-utils" },
         { "path": "../e2e-credentials-store" },
         { "path": "../logging" },

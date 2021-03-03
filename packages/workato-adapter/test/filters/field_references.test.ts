@@ -14,10 +14,10 @@
 * limitations under the License.
 */
 import { ElemID, InstanceElement, ObjectType, ReferenceExpression, Element, BuiltinTypes, isInstanceElement, ListType } from '@salto-io/adapter-api'
-import { filterUtils } from '@salto-io/adapter-components'
+import { filterUtils } from '@salto-io/adapter-utils'
 import filterCreator from '../../src/filters/field_references'
 import WorkatoClient from '../../src/client/client'
-import { DEFAULT_TYPES, DEFAULT_ID_FIELDS } from '../../src/config'
+import { DEFAULT_ENDPOINTS } from '../../src/config'
 import { WORKATO } from '../../src/constants'
 
 
@@ -34,15 +34,10 @@ describe('Field references filter', () => {
       client,
       config: {
         fetch: {
-          includeTypes: ['connection', 'recipe'],
+          includeEndpoints: ['connection', 'recipe'],
         },
         apiDefinitions: {
-          typeDefaults: {
-            transformation: {
-              idFields: DEFAULT_ID_FIELDS,
-            },
-          },
-          types: DEFAULT_TYPES,
+          endpoints: DEFAULT_ENDPOINTS,
         },
       },
     }) as FilterType

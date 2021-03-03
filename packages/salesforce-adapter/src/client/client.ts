@@ -24,8 +24,7 @@ import {
   ListMetadataQuery, UpsertResult, QueryResult, DescribeValueTypeResult,
   BatchResultInfo, BulkLoadOperation,
 } from 'jsforce'
-import { client as clientUtils } from '@salto-io/adapter-components'
-import { flatValues } from '@salto-io/adapter-utils'
+import { flatValues, client as clientUtils } from '@salto-io/adapter-utils'
 import { logger } from '@salto-io/logging'
 import { Options, RequestCallback } from 'request'
 import { AccountId, Value } from '@salto-io/adapter-api'

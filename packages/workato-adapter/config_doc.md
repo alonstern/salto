@@ -13,7 +13,7 @@ workato {
     }
   }
   fetch = {
-    includeTypes = [
+    includeEndpoints = [
       "api_access_profiles",
       "api_clients",
       "api_collections",
@@ -60,7 +60,7 @@ workato {
 
 | Name                                        | Default when undefined   | Description
 |---------------------------------------------|--------------------------|------------
-| includeTypes                                | [                        | List of types to fetch
+| includeEndpoints                            | [                        | List of endpoints to fetch
 |                                             |   "api_access_profiles", |
 |                                             |   "api_clients",         |
 |                                             |   "api_collections",     |

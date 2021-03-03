@@ -17,10 +17,10 @@ import {
   ObjectType, ElemID, InstanceElement, Element, BuiltinTypes, isInstanceElement,
   ReferenceExpression,
 } from '@salto-io/adapter-api'
-import { filterUtils } from '@salto-io/adapter-components'
+import { filterUtils } from '@salto-io/adapter-utils'
 import WorkatoClient from '../../src/client/client'
 import filterCreator from '../../src/filters/extract_fields'
-import { DEFAULT_TYPES, DEFAULT_ID_FIELDS } from '../../src/config'
+import { DEFAULT_ENDPOINTS } from '../../src/config'
 import { WORKATO } from '../../src/constants'
 
 describe('Extract fields filter', () => {
@@ -70,10 +70,7 @@ describe('Extract fields filter', () => {
         },
       ),
     ]
-    const typeWithNoInstances = new ObjectType({
-      elemID: new ElemID(WORKATO, 'typeWithNoInstances'),
-    })
-    return [recipeType, connectionType, ...instances, typeWithNoInstances]
+    return [recipeType, connectionType, ...instances]
   }
 
   beforeAll(() => {
@@ -84,49 +81,18 @@ describe('Extract fields filter', () => {
       client,
       config: {
         fetch: {
-          includeTypes: ['connection', 'recipe'],
+          includeEndpoints: ['connection', 'recipe'],
         },
         apiDefinitions: {
-          typeDefaults: {
-            transformation: {
-              idFields: DEFAULT_ID_FIELDS,
-            },
-          },
-          types: {
-            ...DEFAULT_TYPES,
+          endpoints: {
+            ...DEFAULT_ENDPOINTS,
             nonexistentType: {
               request: {
                 url: '/something',
               },
-              transformation: {
-                fieldsToOmit: [
-                  { fieldName: 'created_at', fieldType: 'string' },
-                  { fieldName: 'updated_at', fieldType: 'string' },
-                  { fieldName: 'last_run_at' },
-                  { fieldName: 'job_succeeded_count' },
-                  { fieldName: 'job_failed_count' },
-                ],
-                standaloneFields: [
-                  { fieldName: 'code', parseJSON: true },
-                ],
-              },
-            },
-            typeWithNoInstances: {
-              transformation: {
-                standaloneFields: [
-                  { fieldName: 'something' },
-                ],
-              },
-            },
-            // override existing type with nonexistent standalone field
-            connection: {
-              request: {
-                url: '/connections',
-              },
-              transformation: {
-                standaloneFields: [
-                  { fieldName: 'nonexistent' },
-                ],
+              translation: {
+                fieldsToOmit: ['last_run_at', 'job_succeeded_count', 'job_failed_count', 'created_at', 'updated_at'],
+                fieldsToExtract: ['code'],
               },
             },
           },
@@ -173,14 +139,14 @@ describe('Extract fields filter', () => {
       expect(elements[3]).toBeInstanceOf(InstanceElement)
       const recipe123 = elements[2] as InstanceElement
       const recipe456 = elements[3] as InstanceElement
+      expect(elements[5]).toBeInstanceOf(ObjectType)
       expect(elements[6]).toBeInstanceOf(ObjectType)
-      expect(elements[7]).toBeInstanceOf(ObjectType)
+      expect(elements[7]).toBeInstanceOf(InstanceElement)
       expect(elements[8]).toBeInstanceOf(InstanceElement)
-      expect(elements[9]).toBeInstanceOf(InstanceElement)
-      const recipeCode = elements[6] as ObjectType
-      const recipeCodeNested = elements[7] as ObjectType
-      const recipe123Code = elements[8] as InstanceElement
-      const recipe456Code = elements[9] as InstanceElement
+      const recipeCode = elements[5] as ObjectType
+      const recipeCodeNested = elements[6] as ObjectType
+      const recipe123Code = elements[7] as InstanceElement
+      const recipe456Code = elements[8] as InstanceElement
 
       expect(Object.keys(recipeCode.fields)).toEqual(['flat', 'nested'])
       expect(Object.keys(recipeCodeNested.fields)).toEqual(['inner', 'other'])
@@ -247,14 +213,14 @@ describe('Extract fields filter', () => {
       expect(elements[3]).toBeInstanceOf(InstanceElement)
       const recipe123 = elements[2] as InstanceElement
       const recipe456 = elements[3] as InstanceElement
+      expect(elements[5]).toBeInstanceOf(ObjectType)
       expect(elements[6]).toBeInstanceOf(ObjectType)
-      expect(elements[7]).toBeInstanceOf(ObjectType)
+      expect(elements[7]).toBeInstanceOf(InstanceElement)
       expect(elements[8]).toBeInstanceOf(InstanceElement)
-      expect(elements[9]).toBeInstanceOf(InstanceElement)
-      const recipeCode = elements[6] as ObjectType
-      const recipeCodeNested = elements[7] as ObjectType
-      const recipe123Code = elements[8] as InstanceElement
-      const recipe456Code = elements[9] as InstanceElement
+      const recipeCode = elements[5] as ObjectType
+      const recipeCodeNested = elements[6] as ObjectType
+      const recipe123Code = elements[7] as InstanceElement
+      const recipe456Code = elements[8] as InstanceElement
 
       expect(Object.keys(recipeCode.fields)).toEqual(['flat', 'nested'])
       expect(Object.keys(recipeCodeNested.fields)).toEqual(['inner', 'other'])

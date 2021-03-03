@@ -18,38 +18,33 @@ import { logger } from '@salto-io/logging'
 import {
   InstanceElement, Adapter,
 } from '@salto-io/adapter-api'
-import { client as clientUtils, config as configUtils } from '@salto-io/adapter-components'
+import { client as clientUtils, elements as elementUtils } from '@salto-io/adapter-utils'
 import WorkatoAdapter from './adapter'
-import { Credentials, usernameTokenCredentialsType } from './auth'
+import {
+  UsernameTokenCredentials, Credentials, usernameTokenCredentialsType,
+} from './auth'
 import changeValidator from './change_validator'
 import {
-  configType, WorkatoConfig, CLIENT_CONFIG, FETCH_CONFIG, DEFAULT_TYPES, DEFAULT_ID_FIELDS,
-  FIELDS_TO_OMIT,
+  configType, WorkatoConfig, CLIENT_CONFIG, FETCH_CONFIG, DEFAULT_ENDPOINTS,
 } from './config'
 import WorkatoClient from './client/client'
 import { createConnection } from './client/connection'
 
 const log = logger(module)
 const { validateCredentials, validateClientConfig } = clientUtils
-const { validateDuckTypeFetchConfig } = configUtils
+const { validateFetchConfig } = elementUtils.ducktype
 
-const credentialsFromConfig = (config: Readonly<InstanceElement>): Credentials => ({
-  username: config.value.username,
-  token: config.value.token,
-})
+const credentialsFromConfig = (config: Readonly<InstanceElement>): Credentials => (
+  new UsernameTokenCredentials({
+    username: config.value.username,
+    token: config.value.token,
+  })
+)
 
 const adapterConfigFromConfig = (config: Readonly<InstanceElement> | undefined): WorkatoConfig => {
   const configValue = config?.value ?? {}
-  const apiDefinitions: configUtils.AdapterDuckTypeApiConfig = _.defaults(
-    {}, configValue.apiDefinitions, {
-      typeDefaults: {
-        transformation: {
-          idFields: DEFAULT_ID_FIELDS,
-          fieldsToOmit: FIELDS_TO_OMIT,
-        },
-      },
-      types: DEFAULT_TYPES,
-    }
+  const apiDefinitions: elementUtils.ducktype.AdapterApiConfig = _.defaults(
+    {}, configValue.apiDefinitions, { endpoints: DEFAULT_ENDPOINTS }
   )
 
   const adapterConfig: { [K in keyof Required<WorkatoConfig>]: WorkatoConfig[K] } = {
@@ -59,7 +54,7 @@ const adapterConfigFromConfig = (config: Readonly<InstanceElement> | undefined):
   }
 
   validateClientConfig(CLIENT_CONFIG, adapterConfig.client)
-  validateDuckTypeFetchConfig(FETCH_CONFIG, adapterConfig.fetch, apiDefinitions)
+  validateFetchConfig(FETCH_CONFIG, adapterConfig.fetch, apiDefinitions)
 
   Object.keys(configValue)
     .filter(k => !Object.keys(adapterConfig).includes(k))

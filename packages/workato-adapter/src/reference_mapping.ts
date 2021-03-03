@@ -15,8 +15,7 @@
 */
 import _ from 'lodash'
 import { Field, Value, Element } from '@salto-io/adapter-api'
-import { elements as elementUtils } from '@salto-io/adapter-components'
-import { GetLookupNameFunc } from '@salto-io/adapter-utils'
+import { GetLookupNameFunc, elements as elementUtils } from '@salto-io/adapter-utils'
 
 const { toNestedTypeName } = elementUtils.ducktype
 

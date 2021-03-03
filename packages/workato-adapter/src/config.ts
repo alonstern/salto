@@ -13,19 +13,16 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-import _ from 'lodash'
 import { ElemID, ObjectType, CORE_ANNOTATIONS } from '@salto-io/adapter-api'
-import { client as clientUtils, config as configUtils } from '@salto-io/adapter-components'
+import { client as clientUtils, elements as elementUtils } from '@salto-io/adapter-utils'
 import { WORKATO } from './constants'
 
 const { createClientConfigType } = clientUtils
-const { createUserFetchConfigType, createDucktypeAdapterApiConfigType } = configUtils
+const { createUserFetchConfigType, createAdapterApiConfigType } = elementUtils.ducktype
 
-export const DEFAULT_ID_FIELDS = ['name']
-export const FIELDS_TO_OMIT: configUtils.FieldToOmitType[] = [
-  { fieldName: 'created_at', fieldType: 'string' },
-  { fieldName: 'updated_at', fieldType: 'string' },
-]
+export const DEFAULT_NAME_FIELD = 'name'
+export const DEFAULT_PATH_FIELD = 'name'
+export const FIELDS_TO_OMIT = ['created_at', 'updated_at']
 
 export const CLIENT_CONFIG = 'client'
 export const FETCH_CONFIG = 'fetch'
@@ -34,8 +31,8 @@ export const API_DEFINITIONS_CONFIG = 'apiDefinitions'
 
 export type WorkatoClientConfig = clientUtils.ClientBaseConfig<clientUtils.ClientRateLimitConfig>
 
-export type WorkatoFetchConfig = configUtils.UserFetchConfig
-export type WorkatoApiConfig = configUtils.AdapterDuckTypeApiConfig
+export type WorkatoFetchConfig = elementUtils.ducktype.UserFetchConfig
+export type WorkatoApiConfig = elementUtils.ducktype.AdapterApiConfig
 
 export type WorkatoConfig = {
   [CLIENT_CONFIG]?: WorkatoClientConfig
@@ -43,7 +40,7 @@ export type WorkatoConfig = {
   [API_DEFINITIONS_CONFIG]: WorkatoApiConfig
 }
 
-export const DEFAULT_TYPES: Record<string, configUtils.TypeDuckTypeConfig> = {
+export const DEFAULT_ENDPOINTS: Record<string, elementUtils.ducktype.EndpointConfig> = {
   connection: {
     request: {
       url: '/connections',
@@ -53,16 +50,9 @@ export const DEFAULT_TYPES: Record<string, configUtils.TypeDuckTypeConfig> = {
     request: {
       url: '/recipes',
     },
-    transformation: {
-      fieldsToOmit: [
-        ...FIELDS_TO_OMIT,
-        { fieldName: 'last_run_at' },
-        { fieldName: 'job_succeeded_count' },
-        { fieldName: 'job_failed_count' },
-      ],
-      standaloneFields: [
-        { fieldName: 'code', parseJSON: true },
-      ],
+    translation: {
+      fieldsToOmit: ['last_run_at', 'job_succeeded_count', 'job_failed_count', 'created_at', 'updated_at'],
+      fieldsToExtract: ['code'],
     },
   },
   folder: {
@@ -111,7 +101,7 @@ export const DEFAULT_TYPES: Record<string, configUtils.TypeDuckTypeConfig> = {
         prefix: '',
       },
     },
-    transformation: {
+    translation: {
       hasDynamicFields: true,
     },
   },
@@ -128,23 +118,15 @@ export const configType = new ObjectType({
       annotations: {
         [CORE_ANNOTATIONS.REQUIRED]: true,
         [CORE_ANNOTATIONS.DEFAULT]: {
-          includeTypes: [
-            ...Object.keys(_.pickBy(DEFAULT_TYPES, def => def.request !== undefined)),
-          ].sort(),
+          includeEndpoints: [...Object.keys(DEFAULT_ENDPOINTS)].sort(),
         },
       },
     },
     [API_DEFINITIONS_CONFIG]: {
-      type: createDucktypeAdapterApiConfigType({ adapter: WORKATO }),
+      type: createAdapterApiConfigType(WORKATO),
       annotations: {
         [CORE_ANNOTATIONS.DEFAULT]: {
-          typeDefaults: {
-            transformation: {
-              idFields: DEFAULT_ID_FIELDS,
-              fieldsToOmit: FIELDS_TO_OMIT,
-            },
-          },
-          types: DEFAULT_TYPES,
+          endpoints: DEFAULT_ENDPOINTS,
         },
       },
     },
